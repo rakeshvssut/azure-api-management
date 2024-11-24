@@ -1,0 +1,839 @@
+{
+	"info": {
+		"_postman_id": "fa83a6da-38b4-4005-a90d-3ac1c3550b50",
+		"name": "Azure API Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39937161"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Get Bearer Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"bearerToken\", pm.response.json().access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{clientID}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{clientSecret}}",
+									"type": "text"
+								},
+								{
+									"key": "resource",
+									"value": "https://management.azure.com/",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://login.microsoftonline.com/{{tenantID}}/oauth2/token",
+							"protocol": "https",
+							"host": [
+								"login",
+								"microsoftonline",
+								"com"
+							],
+							"path": [
+								"{{tenantID}}",
+								"oauth2",
+								"token"
+							]
+						},
+						"description": "Get a bearer token\n\nRun the \"Get Bearer Token\" request. Everything has been set up, so if you had set up your environment variables as described in the general workspace description above, you should be good to go.\n\nOnce you send the request, the test script in the request will assign a token value to the bearerToken variable in your environment.\n\nYou will need this token for any call you make to the REST API. If you ever get a 401 response in any subsequent call in this collection, the token has most likely expired and you need to run this request again to get a new token."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2.Resource Creation & Deletion",
+			"item": [
+				{
+					"name": "Create Resource Group",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste Token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"location\": \"{{region}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourcegroups/{{resourceGroupName}}?api-version=2021-04-01&Subscription-ID={{subscriptionId}}&Resourcegroup-Name={{resourceGroupName}}&Region={{region}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourcegroups",
+								"{{resourceGroupName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2021-04-01"
+								},
+								{
+									"key": "Subscription-ID",
+									"value": "{{subscriptionId}}"
+								},
+								{
+									"key": "Resourcegroup-Name",
+									"value": "{{resourceGroupName}}"
+								},
+								{
+									"key": "Region",
+									"value": "{{region}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create virtual network with subnet",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste Your Token Here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"properties\": {\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"{{vNet-cidr}}\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"{{subent-name}}\",\r\n        \"properties\": {\r\n          \"addressPrefix\": \"{{subnet-cidr}}\"\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  \"location\": \"{{region}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}/providers/Microsoft.Network/virtualNetworks/{{virtualNetworkName}}?api-version=2024-03-01&Subscription-ID={{subscriptionId}}&Resourcegroup-Name={{resourceGroupName}}&vNet-Name={{virtualNetworkName}}&Subnet-Name={{subent-name}}&vNet-CIDR={{vNet-cidr}}&Subnet-CIDR={{subnet-cidr}}&Region-Name={{region}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupName}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualNetworks",
+								"{{virtualNetworkName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2024-03-01"
+								},
+								{
+									"key": "Subscription-ID",
+									"value": "{{subscriptionId}}"
+								},
+								{
+									"key": "Resourcegroup-Name",
+									"value": "{{resourceGroupName}}"
+								},
+								{
+									"key": "vNet-Name",
+									"value": "{{virtualNetworkName}}"
+								},
+								{
+									"key": "Subnet-Name",
+									"value": "{{subent-name}}"
+								},
+								{
+									"key": "vNet-CIDR",
+									"value": "{{vNet-cidr}}"
+								},
+								{
+									"key": "Subnet-CIDR",
+									"value": "{{subnet-cidr}}"
+								},
+								{
+									"key": "Region-Name",
+									"value": "{{region}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create NIC",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste the Token Here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"location\": \"westeurope\",\r\n  \"properties\": {\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipConfig1\",\r\n        \"properties\": {\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/{{Subscription ID}}/resourceGroups/{{Resource Group Name}}/providers/Microsoft.Network/virtualNetworks/vnet-westeurope/subnets/snet-westeurope-1\"\r\n          }\r\n        }\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{Subscription ID}}/resourceGroups/{{Resource Group Name}}/providers/Microsoft.Network/networkInterfaces/{{NIC Name}}?api-version=2023-05-01",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{Subscription ID}}",
+								"resourceGroups",
+								"{{Resource Group Name}}",
+								"providers",
+								"Microsoft.Network",
+								"networkInterfaces",
+								"{{NIC Name}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2023-05-01"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "VM Creation Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste Token Here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"location\": \"westeurope\",\r\n  \"properties\": {\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"sku\": \"16.04-LTS\",\r\n        \"publisher\": \"Canonical\",\r\n        \"version\": \"latest\",\r\n        \"offer\": \"UbuntuServer\"\r\n      },\r\n      \"osDisk\": {\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\r\n        },\r\n        \"name\": \"myVMosdisk\",\r\n        \"createOption\": \"FromImage\"\r\n      }\r\n    },\r\n    \"osProfile\": {\r\n      \"adminUsername\": \"Otis-POC\",\r\n      \"computerName\": \"myVM\",\r\n      \"adminPassword\": \"Otis-POC123!@\",\r\n      \"linuxConfiguration\": {\r\n        \"provisionVMAgent\": true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\"\r\n        }\r\n      }\r\n    },\r\n    \"networkProfile\": {\r\n      \"networkInterfaces\": [\r\n        {\r\n          \"id\": \"/subscriptions/7dbcc235-9752-49a3-9683-df21febc7e18/resourceGroups/TestResourceGroup/providers/Microsoft.Network/networkInterfaces/Test-NIC\",\r\n          \"properties\": {\r\n            \"primary\": true\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscription-id}}/resourceGroups/{{Resourcegroup-Name}}/providers/Microsoft.Compute/virtualMachines/{{vm-name}}?api-version=2024-07-01&subscription-id=7dbcc235-9752-49a3-9683-df21febc7e18",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscription-id}}",
+								"resourceGroups",
+								"{{Resourcegroup-Name}}",
+								"providers",
+								"Microsoft.Compute",
+								"virtualMachines",
+								"{{vm-name}}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2024-07-01"
+								},
+								{
+									"key": "subscription-id",
+									"value": "7dbcc235-9752-49a3-9683-df21febc7e18"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "VM Deletion Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste token Here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"location\": \"westeurope\",\r\n  \"properties\": {\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"{{VM-Size}}\"\r\n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"sku\": \"16.04-LTS\",\r\n        \"publisher\": \"Canonical\",\r\n        \"version\": \"latest\",\r\n        \"offer\": \"UbuntuServer\"\r\n      },\r\n      \"osDisk\": {\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Standard_LRS\"\r\n        },\r\n        \"name\": \"{{VM-Name}}-OS-disk\",\r\n        \"createOption\": \"FromImage\"\r\n      }\r\n    },\r\n    \"osProfile\": {\r\n      \"adminUsername\": \"Otis-POC\",\r\n      \"computerName\": \"{{VM-Name}}\",\r\n      \"adminPassword\": \"Otis-POC123!@\",\r\n      \"linuxConfiguration\": {\r\n        \"provisionVMAgent\": true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\"\r\n        }\r\n      }\r\n    },\r\n    \"networkProfile\": {\r\n      \"networkInterfaces\": [\r\n        {\r\n          \"id\": \"/subscriptions/{{subscription-id}}/resourceGroups/{{Resourcegroup-Name}}/providers/Microsoft.Network/networkInterfaces/{{NIC-Name}}\",\r\n          \"properties\": {\r\n            \"primary\": true\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscription-id}}/resourceGroups/{{Resourcegroup-Name}}/providers/Microsoft.Compute/virtualMachines/{{VM-Name}}?api-version=2024-07-01&subscription-id={{subscription-id}}&Resourcegroup-Name={{Resourcegroup-Name}}&NIC-Name={{NIC-Name}}&VM-Name={{VM-Name}}&VM-Size={{VM-Size}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscription-id}}",
+								"resourceGroups",
+								"{{Resourcegroup-Name}}",
+								"providers",
+								"Microsoft.Compute",
+								"virtualMachines",
+								"{{VM-Name}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2024-07-01"
+								},
+								{
+									"key": "subscription-id",
+									"value": "{{subscription-id}}"
+								},
+								{
+									"key": "Resourcegroup-Name",
+									"value": "{{Resourcegroup-Name}}"
+								},
+								{
+									"key": "NIC-Name",
+									"value": "{{NIC-Name}}"
+								},
+								{
+									"key": "VM-Name",
+									"value": "{{VM-Name}}"
+								},
+								{
+									"key": "VM-Size",
+									"value": "{{VM-Size}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disk Delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste your Token here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}/providers/Microsoft.Compute/disks/{{diskName}}?api-version=2024-03-02&Subscription-ID={{subscriptionId}}&Resourcegroup-Name={{resourceGroupName}}&Disk-Name={{diskName}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupName}}",
+								"providers",
+								"Microsoft.Compute",
+								"disks",
+								"{{diskName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2024-03-02"
+								},
+								{
+									"key": "Subscription-ID",
+									"value": "{{subscriptionId}}"
+								},
+								{
+									"key": "Resourcegroup-Name",
+									"value": "{{resourceGroupName}}"
+								},
+								{
+									"key": "Disk-Name",
+									"value": "{{diskName}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get VM Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `\r",
+									"<style type=\"text/css\">\r",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+									"    .tftable tr {background-color:#ffffff;}\r",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+									"    .tftable tr:hover {background-color:#e0ffff;}\r",
+									"</style>\r",
+									"\r",
+									"<table class=\"tftable\" border=\"1\">\r",
+									"    <tr>\r",
+									"        <th>Name</th>\r",
+									"        <th>ID</th>\r",
+									"        <th>Type</th>\r",
+									"        <th>Location</th>\r",
+									"        <th>VM Size</th>\r",
+									"        <th>Provisioning State</th>\r",
+									"        <th>VM ID</th>\r",
+									"        <th>Image Publisher</th>\r",
+									"        <th>OS Type</th>\r",
+									"        <th>OS Disk Name</th>\r",
+									"        <th>Created On</th>\r",
+									"    </tr>\r",
+									"    <tr>\r",
+									"        <td>{{name}}</td>\r",
+									"        <td>{{id}}</td>\r",
+									"        <td>{{type}}</td>\r",
+									"        <td>{{location}}</td>\r",
+									"        <td>{{properties.hardwareProfile.vmSize}}</td>\r",
+									"        <td>{{properties.provisioningState}}</td>\r",
+									"        <td>{{properties.vmId}}</td>\r",
+									"        <td>{{properties.storageProfile.imageReference.publisher}}</td>\r",
+									"        <td>{{properties.storageProfile.osDisk.osType}}</td>\r",
+									"        <td>{{properties.storageProfile.osDisk.name}}</td>\r",
+									"        <td>{{properties.timeCreated}}</td>\r",
+									"    </tr>\r",
+									"</table>\r",
+									"`;\r",
+									"\r",
+									"function constructVisualizerPayload() {\r",
+									"    return { response: pm.response.json() };\r",
+									"}\r",
+									"\r",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste Your Token here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscription-id}}/resourceGroups/{{Resourcegroup-Name}}/providers/Microsoft.Compute/virtualMachines/{{VM-Name}}?api-version=2024-07-01&Subscription-ID={{subscription-id}}&Resourcegroup-Name={{Resourcegroup-Name}}&VM-Name={{VM-Name}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscription-id}}",
+								"resourceGroups",
+								"{{Resourcegroup-Name}}",
+								"providers",
+								"Microsoft.Compute",
+								"virtualMachines",
+								"{{VM-Name}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2024-07-01"
+								},
+								{
+									"key": "Subscription-ID",
+									"value": "{{subscription-id}}"
+								},
+								{
+									"key": "Resourcegroup-Name",
+									"value": "{{Resourcegroup-Name}}"
+								},
+								{
+									"key": "VM-Name",
+									"value": "{{VM-Name}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Azure Recovery Services vault",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste Your Token Here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"properties\": {},\r\n  \"sku\": {\r\n    \"name\": \"{{sku}}\"\r\n  },\r\n  \"location\": \"{{region}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}/providers/Microsoft.RecoveryServices/vaults/{{vaultName}}?api-version=2016-06-01&Subscription-ID={{subscriptionId}}&Resourcegroup-Name={{resourceGroupName}}&Recovery-Service-vault-Name={{vaultName}}&SKU={{sku}}&Region={{region}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupName}}",
+								"providers",
+								"Microsoft.RecoveryServices",
+								"vaults",
+								"{{vaultName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2016-06-01"
+								},
+								{
+									"key": "Subscription-ID",
+									"value": "{{subscriptionId}}"
+								},
+								{
+									"key": "Resourcegroup-Name",
+									"value": "{{resourceGroupName}}"
+								},
+								{
+									"key": "Recovery-Service-vault-Name",
+									"value": "{{vaultName}}"
+								},
+								{
+									"key": "SKU",
+									"value": "{{sku}}"
+								},
+								{
+									"key": "Region",
+									"value": "{{region}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Azure Recovery Services backup policies",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste Your Token Here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"properties\": {\r\n    \"backupManagementType\": \"AzureIaasVM\",\r\n    \"timeZone\": \"Pacific Standard Time\",\r\n    \"schedulePolicy\": {\r\n      \"schedulePolicyType\": \"SimpleSchedulePolicy\",\r\n      \"scheduleRunFrequency\": \"Weekly\",\r\n      \"scheduleRunTimes\": [\r\n        \"2018-01-24T10:00:00Z\"\r\n      ],\r\n      \"scheduleRunDays\": [\r\n        \"Monday\",\r\n        \"Wednesday\",\r\n        \"Thursday\"\r\n      ]\r\n    },\r\n    \"retentionPolicy\": {\r\n      \"retentionPolicyType\": \"LongTermRetentionPolicy\",\r\n      \"weeklySchedule\": {\r\n        \"daysOfTheWeek\": [\r\n          \"Monday\",\r\n          \"Wednesday\",\r\n          \"Thursday\"\r\n        ],\r\n        \"retentionTimes\": [\r\n          \"2018-01-24T10:00:00Z\"\r\n        ],\r\n        \"retentionDuration\": {\r\n          \"count\": 1,\r\n          \"durationType\": \"Weeks\"\r\n        }\r\n      },\r\n      \"monthlySchedule\": {\r\n        \"retentionScheduleFormatType\": \"Weekly\",\r\n        \"retentionScheduleWeekly\": {\r\n          \"daysOfTheWeek\": [\r\n            \"Wednesday\",\r\n            \"Thursday\"\r\n          ],\r\n          \"weeksOfTheMonth\": [\r\n            \"First\",\r\n            \"Third\"\r\n          ]\r\n        },\r\n        \"retentionTimes\": [\r\n          \"2018-01-24T10:00:00Z\"\r\n        ],\r\n        \"retentionDuration\": {\r\n          \"count\": 2,\r\n          \"durationType\": \"Months\"\r\n        }\r\n      },\r\n      \"yearlySchedule\": {\r\n        \"retentionScheduleFormatType\": \"Weekly\",\r\n        \"monthsOfYear\": [\r\n          \"February\",\r\n          \"November\"\r\n        ],\r\n        \"retentionScheduleWeekly\": {\r\n          \"daysOfTheWeek\": [\r\n            \"Monday\",\r\n            \"Thursday\"\r\n          ],\r\n          \"weeksOfTheMonth\": [\r\n            \"Fourth\"\r\n          ]\r\n        },\r\n        \"retentionTimes\": [\r\n          \"2018-01-24T10:00:00Z\"\r\n        ],\r\n        \"retentionDuration\": {\r\n          \"count\": 1,\r\n          \"durationType\": \"Years\"\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/Subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}/providers/Microsoft.RecoveryServices/vaults/{{vaultName}}/backupPolicies/{{policyName}}?api-version=2019-05-13&Subscription-Id={{subscriptionId}}&Resourcegroup-Name={{resourceGroupName}}&Recovery-Service-vault-Name={{vaultName}}&Backup-Policy-Name={{policyName}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"Subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupName}}",
+								"providers",
+								"Microsoft.RecoveryServices",
+								"vaults",
+								"{{vaultName}}",
+								"backupPolicies",
+								"{{policyName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2019-05-13"
+								},
+								{
+									"key": "Subscription-Id",
+									"value": "{{subscriptionId}}"
+								},
+								{
+									"key": "Resourcegroup-Name",
+									"value": "{{resourceGroupName}}"
+								},
+								{
+									"key": "Recovery-Service-vault-Name",
+									"value": "{{vaultName}}"
+								},
+								{
+									"key": "Backup-Policy-Name",
+									"value": "{{policyName}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Back up an Azure VM using Azure Backup",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste Your Token Here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"properties\": {\r\n    \"protectedItemType\": \"Microsoft.Compute/virtualMachines\",\r\n    \"sourceResourceId\": \"/subscriptions/{{subscriptionId}}/resourceGroups/{{vaultresourceGroupName}}/providers/Microsoft.Compute/virtualMachines/{{vmname}}\",\r\n    \"policyId\": \"/subscriptions/{{subscriptionId}}/resourceGroups/{{vaultresourceGroupName}}/providers/microsoft.recoveryservices/vaults/{{vaultName}}/backupPolicies/{{backuppolicyname}}\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/Subscriptions/{{subscriptionId}}/resourceGroups/{{vaultresourceGroupName}}/providers/Microsoft.RecoveryServices/vaults/{{vaultName}}/backupFabrics/Azure/protectionContainers/iaasvmcontainer;iaasvmcontainerv2;{{vaultresourceGroupName}};{{vmname}}/protectedItems/vm;iaasvmcontainerv2;{{vaultresourceGroupName}};{{vmname}}?api-version=2019-05-13&Subscription-ID={{subscriptionId}}&Resourcegroup-Name={{vaultresourceGroupName}}&VM-Name={{vmname}}&Backup-Policy-Name={{backuppolicyname}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"Subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{vaultresourceGroupName}}",
+								"providers",
+								"Microsoft.RecoveryServices",
+								"vaults",
+								"{{vaultName}}",
+								"backupFabrics",
+								"Azure",
+								"protectionContainers",
+								"iaasvmcontainer;iaasvmcontainerv2;{{vaultresourceGroupName}};{{vmname}}",
+								"protectedItems",
+								"vm;iaasvmcontainerv2;{{vaultresourceGroupName}};{{vmname}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2019-05-13"
+								},
+								{
+									"key": "Subscription-ID",
+									"value": "{{subscriptionId}}"
+								},
+								{
+									"key": "Resourcegroup-Name",
+									"value": "{{vaultresourceGroupName}}"
+								},
+								{
+									"key": "VM-Name",
+									"value": "{{vmname}}"
+								},
+								{
+									"key": "Backup-Policy-Name",
+									"value": "{{backuppolicyname}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resource Groups - Delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "Paste Your Token Here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourcegroups/{{resourceGroupName}}?api-version=2021-04-01&Subscription-ID={{subscriptionId}}&Resourcegroup-Name={{resourceGroupName}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourcegroups",
+								"{{resourceGroupName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2021-04-01"
+								},
+								{
+									"key": "Subscription-ID",
+									"value": "{{subscriptionId}}"
+								},
+								{
+									"key": "Resourcegroup-Name",
+									"value": "{{resourceGroupName}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
